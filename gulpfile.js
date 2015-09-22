@@ -1,17 +1,19 @@
 // ////////////////////////////////////////////////
 // jsConcatFiles => list of javascript files (in order) to concatenate
-// distFilesFoldersRemove => list of files to remove when running final dist
 // // /////////////////////////////////////////////
 
 var config = {
 	jsConcatFiles: [
-            'app/js/app.js'
+            'app/js/app.js',
+            'app/js/controllers.js'
 	], 
-	distFilesFoldersRemove:[
-            'app/js/*.min.js',
-            'dist/js/!(*.min.js)',
-	    'dist/bower.json',
-	]
+        distFilesBowerCopy: [
+            'app/bower_components/leaflet/dist/leaflet.js',
+            'app/bower_components/leaflet/dist/leaflet.css',
+            'app/bower_components/angular/angular.min.js',
+            'app/bower_components/angular-simple-logger/dist/angular-simple-logger.min.js',
+            'app/bower_components/angular-leaflet-directive/dist/angular-leaflet-directive.min.js'
+        ]
 };
 
 
@@ -50,7 +52,7 @@ gulp.task('scripts', ['dist:cleanfolder'], function() {
     .pipe(concat('temp.js'))
     .pipe(uglify())
     .pipe(rename('app.min.js'))		
-    .pipe(gulp.dest('app/js'))
+    .pipe(gulp.dest('dist/js'))
     .pipe(reload({stream:true}));
 });
 
@@ -118,18 +120,18 @@ gulp.task('dist:cleanfolder', function () {
 
 // task to create dist directory of all files
 gulp.task('dist:copy', ['scripts', 'replace-html'], function(){
-    return gulp.src(['app/**/*/','!app/index.html'])
+    return gulp.src(
+        ['app/!(bower_components)/*/','!app/index.html', '!app/js/app.js', '!app/js/controllers.js']
+    )
     .pipe(gulp.dest('dist/'));
 });
 
-// task to removed unwanted dist files
-// list all files and directories here that you don't want included
-gulp.task('dist:remove', ['dist:copy'], function () {
-    return gulp.src(config.distFilesFoldersRemove, { read: false}).
-        pipe(clean());
+gulp.task('dist:copy-components', ['scripts', 'replace-html'], function () {
+    return gulp.src(config.distFilesBowerCopy, { base: 'app/bower_components/'}).
+        pipe(gulp.dest('dist/bower_components'));
 });
 
-gulp.task('dist', ['dist:copy', 'dist:remove']);
+gulp.task('dist', ['dist:copy', 'dist:copy-components']);
 
 // ////////////////////////////////////////////////
 // Watch Tasks
