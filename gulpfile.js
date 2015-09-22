@@ -5,13 +5,12 @@
 
 var config = {
 	jsConcatFiles: [
-            'app/js/main.js'
+            'app/js/app.js'
 	], 
 	distFilesFoldersRemove:[
             'app/js/*.min.js',
             'dist/js/!(*.min.js)',
 	    'dist/bower.json',
-            'dist/bower_components/',
 	]
 };
 
@@ -31,8 +30,9 @@ var gulp = require('gulp'),
 	concat = require('gulp-concat'),
 	uglify = require('gulp-uglify'),
 	rename = require('gulp-rename'),
-        clean = require('gulp-clean');
-        taskListing = require('gulp-task-listing'),
+        clean = require('gulp-clean'),
+        htmlReplace = require('gulp-html-replace'),
+        taskListing = require('gulp-task-listing');
 
 
 // ////////////////////////////////////////////////
@@ -68,9 +68,17 @@ gulp.task('jshint', function() {
 // HTML Tasks
 // // /////////////////////////////////////////////
 
-gulp.task('html', function(){
+gulp.task('html', ['replace-html'], function(){
     return gulp.src('app/**/*.html')
     .pipe(reload({stream:true}));
+});
+
+gulp.task('replace-html', function () {
+    return gulp.src('app/index.html')
+    .pipe(htmlReplace({
+        'js': 'js/app.min.js'
+    }))
+    .pipe(gulp.dest('dist'));
 });
 
 
@@ -109,8 +117,8 @@ gulp.task('dist:cleanfolder', function () {
 });
 
 // task to create dist directory of all files
-gulp.task('dist:copy', ['scripts'], function(){
-    return gulp.src('app/**/*/')
+gulp.task('dist:copy', ['scripts', 'replace-html'], function(){
+    return gulp.src(['app/**/*/','!app/index.html'])
     .pipe(gulp.dest('dist/'));
 });
 
