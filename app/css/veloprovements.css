@@ -1,10 +1,19 @@
 html {
  height: 100%;
+ width: 100%;
+ overflow: hidden;
+ position: relative;
 }
 
 body {
- height: 100%;
+ position: absolute;
+ top: 0;
+ bottom: 0;
+ left: 0;
+ right: -15px; /* Decrease this value for cross-browser compatibility */
+ overflow: auto;
 }
+
 .angular-leaflet-map {
  height: 100%;
  width: 100%;
