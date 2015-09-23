@@ -7,6 +7,7 @@
     <script src="bower_components/angular-simple-logger/dist/angular-simple-logger.min.js"></script>
     <script src="bower_components/angular-leaflet-directive/dist/angular-leaflet-directive.min.js"></script>
     <link rel="stylesheet" href="bower_components/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="css/veloprovements.css" />
     <!-- build:js -->
     <script src="js/app.js"></script>
     <script src="js/controllers.js"></script>
@@ -14,7 +15,6 @@
   </head>
 
   <body ng-controller="BasicFirstController">
-    <leaflet width="100%" height="480px"></leaflet>
-    <h1>First steps, basic example</h1>
+    <leaflet bounds="bounds" lf-center="center"></leaflet>
   </body>
 </html>
