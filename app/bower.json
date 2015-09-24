@@ -1,0 +1,20 @@
+{
+  "name": "veloprovements",
+  "version": "0.0.0",
+  "homepage": "https://github.com/rpoisel/veloprovements",
+  "authors": [
+    "Rainer Poisel <rainer.poisel@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular-leaflet-directive": "angular-leaflet#~0.8.8",
+    "angular.panels": "~1.0.3"
+  }
+}
