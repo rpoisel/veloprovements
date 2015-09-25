@@ -12,6 +12,10 @@ angular.module('demoapp').controller("BasicFirstController",
             $scope._obtainVeloprovements(event.name);
         });
 
+        $scope.$on('leafletDirectiveMap.click', function(event) {
+            $scope.$broadcast('nodeMenuOpen', {});
+        });
+
         $scope._obtainVeloprovements = function (eventName) {
             $http.get("js/data.js?" +
                     "southWestLat=" + $scope.bounds.southWest.lat + "&southWestLng=" + $scope.bounds.southWest.lng +
@@ -36,3 +40,8 @@ angular.module('demoapp').controller("BasicFirstController",
         });
 }]);
 
+angular.module('demoapp').controller('nodeMenuCtrl', ['$scope', 'panels', function ($scope, panels) {
+    $scope.$on('nodeMenuOpen', function(event, args) {
+        panels.open('nodeMenu');
+    });
+}]);
