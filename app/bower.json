@@ -15,6 +15,7 @@
   ],
   "dependencies": {
     "angular-leaflet-directive": "angular-leaflet#~0.8.8",
-    "angular.panels": "~1.0.3"
+    "angular.panels": "~1.0.3",
+    "leaflet-draw": "leaflet.draw#~0.2.4"
   }
 }
