@@ -1,12 +1,18 @@
 {
-    "points": [
+    "type": "FeatureCollection",
+    "features": [
         {
-            "lat": "51.7",
-            "lng": "0.9"
-        },
-        {
-            "lat": "52.7",
-            "lng": "0.7"
+            "type": "Feature",
+            "properties": {
+                "name": "Landhauskreisverkehr"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    15.632579326629637,
+                    48.198534086746
+                ]
+            }
         }
     ]
 }

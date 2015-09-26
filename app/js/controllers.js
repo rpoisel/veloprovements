@@ -1,18 +1,11 @@
-angular.module('demoapp').controller("BasicFirstController",
+angular.module('demoapp').controller("MainController",
         [ "$scope", "$http", "leafletData", "leafletBoundsHelpers", "leafletEvents",
         function($scope, $http, leafletData, leafletBoundsHelpers, leafletEvents) {
 
         //console.log(leafletEvents.getAvailableMapEvents());
         leafletData.getMap().then(function(map) {
-            leafletData.getLayers().then(function(baselayers) {
-                var drawnItems = baselayers.overlays.draw;
-                map.on('draw:created', function (e) {
-                    console.log($scope);
-                    var layer = e.layer;
-                    drawnItems.addLayer(layer);
-                    $scope.$broadcast('nodeMenuOpen', {});
-                    //console.log(JSON.stringify(layer.toGeoJSON()));
-                });
+            map.on('draw:created', function (element) {
+                $scope.$broadcast('improvementCreated', element);
             });
         });
 
@@ -24,18 +17,35 @@ angular.module('demoapp').controller("BasicFirstController",
             $scope._obtainVeloprovements(event.name);
         });
 
-        /*
         $scope.$on('leafletDirectiveMap.click', function(event) {
-            $scope.$broadcast('nodeMenuOpen', {});
+            /*
+            $scope.$broadcast('editImprovement', {});
+            */
         });
-        */
+
+        $scope.$on("leafletDirectiveGeoJson.click", function(ev, leafletPayload) {
+            /*
+            console.log(leafletPayload.leafletObject.feature);
+            console.log(leafletPayload.leafletEvent);
+            */
+            $scope.$broadcast('editImprovement', leafletPayload);
+            //console.log("GeoJSON feature selected");
+        });
 
         $scope._obtainVeloprovements = function (eventName) {
             $http.get("js/data.js?" +
                     "southWestLat=" + $scope.bounds.southWest.lat + "&southWestLng=" + $scope.bounds.southWest.lng +
                     "northEastLat=" + $scope.bounds.northEast.lat + "&northEastLng=" + $scope.bounds.northEast.lng)
                 .then(function(response) {
-                    console.log(response.data);
+                    leafletData.getGeoJSON().then(function(geoJSON) {
+                        /*
+                        console.log(geoJSON);
+                        geoJSON.clearLayers();
+                        */
+                        /* TODO add improvemenet to database */
+                        geoJSON.clearLayers();
+                        geoJSON.addData(response.data);
+                    });
                 });
         };
 
@@ -60,20 +70,6 @@ angular.module('demoapp').controller("BasicFirstController",
             },
             layers : {
                 baselayers: {
-                    /*
-                    mapbox_light: {
-                        name: 'Mapbox Light',
-                        url: 'http://api.tiles.mapbox.com/v4/{mapid}/{z}/{x}/{y}.png?access_token={apikey}',
-                        type: 'xyz',
-                        layerOptions: {
-                            apikey: 'pk.eyJ1IjoiYnVmYW51dm9scyIsImEiOiJLSURpX0pnIn0.2_9NrLz1U9bpwMQBhVk97Q',
-                            mapid: 'bufanuvols.lia22g09'
-                        },
-                        layerParams: {
-                            showOnSelector: false
-                        }
-                    }
-                    */
                     openCycleMap: {
                         name: 'OpenCycleMap',
                         url: 'http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png',
@@ -88,14 +84,59 @@ angular.module('demoapp').controller("BasicFirstController",
                         layerParams: {
                             showOnSelector: false
                         }
+                    },
+                    improvements: {
+                        name: 'improvements',
+                        type: 'group',
+                        visible: true,
+                        layerParams: {
+                            showOnSelector: false
+                        }
                     }
                 }
+            },
+            geojson: {
+                data: {
+                    "type":"FeatureCollection",
+                    "features": []
+                },
+                //style: style,
+                resetStyleOnMouseout: true
             }
         });
 }]);
 
-angular.module('demoapp').controller('nodeMenuCtrl', ['$scope', 'panels', function ($scope, panels) {
-    $scope.$on('nodeMenuOpen', function(event, args) {
-        panels.open('nodeMenu');
+angular.module('demoapp').controller('CreateImprovementCtrl',
+                ['$scope', 'panels', 'leafletData',
+        function ($scope, panels, leafletData) {
+    $scope.$on('improvementCreated', function(event, element) {
+        /*
+        leafletData.getLayers().then(function(baselayers) {
+            var improvements = baselayers.overlays.improvements;
+            var layer = element.layer;
+            improvements.addLayer(layer);
+            console.log(JSON.stringify(layer.toGeoJSON()));
+            $scope.improvementType = layer.toGeoJSON().geometry.type;
+            panels.open('createImprovement');
+        });
+        */
+        leafletData.getGeoJSON().then(function(geoJSON) {
+            /* TODO add improvemenet to database */
+            geoJSON.addData(element.layer.toGeoJSON());
+            console.log(JSON.stringify(element.layer.toGeoJSON()));
+            panels.open('createImprovement');
+        });
+    });
+    $scope.saveImprovement = function() {
+        panels.close("createImprovement");
+    }
+}]);
+
+angular.module('demoapp').controller('EditImprovementCtrl',
+                ['$scope', 'panels', 'leafletData',
+        function ($scope, panels, leafletData) {
+    $scope.$on('editImprovement', function(event, leafletPayload) {
+        $scope.improvementName = leafletPayload.model.properties.name;
+        panels.open('editImprovement');
     });
 }]);
