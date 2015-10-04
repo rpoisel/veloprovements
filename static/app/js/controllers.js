@@ -33,7 +33,8 @@ angular.module('demoapp').controller("MainController",
         });
 
         $scope._obtainVeloprovements = function (eventName) {
-            $http.get("js/data.js?" +
+            $http.get("dynamic/veloprovements" +
+                    "?" +
                     "southWestLat=" + $scope.bounds.southWest.lat + "&southWestLng=" + $scope.bounds.southWest.lng +
                     "northEastLat=" + $scope.bounds.northEast.lat + "&northEastLng=" + $scope.bounds.northEast.lng)
                 .then(function(response) {
@@ -123,7 +124,7 @@ angular.module('demoapp').controller('CreateImprovementCtrl',
         leafletData.getGeoJSON().then(function(geoJSON) {
             /* TODO add improvemenet to database */
             geoJSON.addData(element.layer.toGeoJSON());
-            console.log(JSON.stringify(element.layer.toGeoJSON()));
+            console.log(JSON.stringify(element.layer.toGeoJSON().geometry));
             panels.open('createImprovement');
         });
     });
