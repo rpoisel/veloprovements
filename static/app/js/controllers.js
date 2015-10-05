@@ -108,8 +108,8 @@ angular.module('demoapp').controller("MainController",
 }]);
 
 angular.module('demoapp').controller('CreateImprovementCtrl',
-                ['$scope', 'panels', 'leafletData',
-        function ($scope, panels, leafletData) {
+                ['$scope', 'panels', '$http', 'leafletData',
+        function ($scope, panels, $http, leafletData) {
     $scope.$on('improvementCreated', function(event, element) {
         /*
         leafletData.getLayers().then(function(baselayers) {
@@ -123,12 +123,20 @@ angular.module('demoapp').controller('CreateImprovementCtrl',
         */
         leafletData.getGeoJSON().then(function(geoJSON) {
             /* TODO add improvemenet to database */
+            /*
             geoJSON.addData(element.layer.toGeoJSON());
-            console.log(JSON.stringify(element.layer.toGeoJSON().geometry));
-            panels.open('createImprovement');
+            */
         });
+        $scope.newVeloprovement = element.layer.toGeoJSON();
+        panels.open('createImprovement');
     });
+
     $scope.saveImprovement = function() {
+        //console.log("Storing new veloprovement: " + JSON.stringify($scope.newVeloprovement.geometry));
+        $http.post("dynamic/veloprovements",
+                {
+                    'geometry': $scope.newVeloprovement.geometry
+                });
         panels.close("createImprovement");
     }
 }]);

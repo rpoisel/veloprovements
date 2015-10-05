@@ -80,8 +80,15 @@ class Veloprovements(Resource):
         }
 
     def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('geometry', type=str)
+        args = parser.parse_args()
+
+        session = db.getSession()
+        session.add(Veloprovement(name='veloprovement', description='bla', geom=args['geometry']))
+        session.commit()
+        session.close();
         #INSERT INTO veloprovements (name, description, geom) VALUES ( 'Europaplatz', 'Radwegfrei', ST_GeomFromGeoJSON('{"type":"Point","coordinates":[15.620176792144774,48.20100838448463]}'));
-        pass
 
 app = Flask(__name__)
 api = Api(app)
