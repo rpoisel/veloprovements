@@ -36,7 +36,7 @@ angular.module('demoapp').controller("MainController",
             $http.get("dynamic/veloprovements" +
                     "?" +
                     "southWestLat=" + $scope.bounds.southWest.lat + "&southWestLng=" + $scope.bounds.southWest.lng +
-                    "northEastLat=" + $scope.bounds.northEast.lat + "&northEastLng=" + $scope.bounds.northEast.lng)
+                    "&northEastLat=" + $scope.bounds.northEast.lat + "&northEastLng=" + $scope.bounds.northEast.lng)
                 .then(function(response) {
                     leafletData.getGeoJSON().then(function(geoJSON) {
                         /*
