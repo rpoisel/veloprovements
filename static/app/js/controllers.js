@@ -5,8 +5,12 @@ angular.module('demoapp').controller("MainController",
         //console.log(leafletEvents.getAvailableMapEvents());
         leafletData.getMap().then(function(map) {
             map.on('draw:created', function (element) {
-                $scope.$broadcast('improvementCreated', element);
+                $scope.$broadcast('improvementCreate', element);
             });
+        });
+
+        $scope.$on('improvementCreated', function(event) {
+            $scope._obtainVeloprovements(event.name);
         });
 
         $scope.$on('leafletDirectiveMap.zoomend', function(event) {
@@ -32,12 +36,17 @@ angular.module('demoapp').controller("MainController",
             //console.log("GeoJSON feature selected");
         });
 
-        $scope._obtainVeloprovements = function (eventName) {
-            $http.get("dynamic/veloprovements" +
-                    "?" +
-                    "southWestLat=" + $scope.bounds.southWest.lat + "&southWestLng=" + $scope.bounds.southWest.lng +
-                    "&northEastLat=" + $scope.bounds.northEast.lat + "&northEastLng=" + $scope.bounds.northEast.lng)
-                .then(function(response) {
+        $scope._obtainVeloprovements = function (eventName, args) {
+            var queryString = "dynamic/veloprovements?";
+            if (args instanceof Object) {
+                queryString += "southWestLat=" + args.southWest.lat + "&southWestLng=" + args.southWest.lng +
+                    "&northEastLat=" + args.northEast.lat + "&northEastLng=" + args.northEast.lng;
+            } else {
+                queryString += "southWestLat=" + $scope.bounds.southWest.lat + "&southWestLng=" + $scope.bounds.southWest.lng +
+                    "&northEastLat=" + $scope.bounds.northEast.lat + "&northEastLng=" + $scope.bounds.northEast.lng;
+            }
+
+            $http.get(queryString).then(function(response) {
                     leafletData.getGeoJSON().then(function(geoJSON) {
                         /*
                         console.log(geoJSON);
@@ -53,12 +62,12 @@ angular.module('demoapp').controller("MainController",
         angular.extend($scope, {
             bounds : {
                 southWest: {
-                    lat:51.508742458803326,
-                    lng: -0.087890625,
+                    lat:48.19315601016896,
+                    lng: 15.609233379364012
                 },
                 northEast: {
-                    lat:51.508742458803326,
-                    lng:-0.087890625,
+                    lat:48.20684324924357,
+                    lng:15.650753974914549
                 }
             },
             center : {
@@ -110,7 +119,7 @@ angular.module('demoapp').controller("MainController",
 angular.module('demoapp').controller('CreateImprovementCtrl',
                 ['$scope', 'panels', '$http', 'leafletData',
         function ($scope, panels, $http, leafletData) {
-    $scope.$on('improvementCreated', function(event, element) {
+    $scope.$on('improvementCreate', function(event, element) {
         /*
         leafletData.getLayers().then(function(baselayers) {
             var improvements = baselayers.overlays.improvements;
@@ -138,6 +147,7 @@ angular.module('demoapp').controller('CreateImprovementCtrl',
                     'geometry': $scope.newVeloprovement.geometry
                 });
         panels.close("createImprovement");
+        $scope.$emit('improvementCreated');
     }
 }]);
 
