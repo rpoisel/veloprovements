@@ -2,8 +2,7 @@ angular.module('demoapp').controller("MainController",
         [ "$scope", "$http", "leafletData", "leafletBoundsHelpers", "leafletEvents",
         function($scope, $http, leafletData, leafletBoundsHelpers, leafletEvents) {
 
-        //console.log(leafletEvents.getAvailableMapEvents());
-        leafletData.getMap().then(function(map) {
+        leafletData.getMap("veloprovementsmap").then(function(map) {
             map.on('draw:created', function (element) {
                 $scope.$broadcast('improvementCreate', element);
             });
@@ -21,54 +20,27 @@ angular.module('demoapp').controller("MainController",
             $scope._obtainVeloprovements(event.name);
         });
 
-        $scope.$on('leafletDirectiveMap.click', function(event) {
-            /*
-            $scope.$broadcast('editImprovement', {});
-            */
-        });
-
         $scope.$on("leafletDirectiveGeoJson.click", function(ev, leafletPayload) {
-            /*
-            console.log(leafletPayload.leafletObject.feature);
-            console.log(leafletPayload.leafletEvent);
-            */
             $scope.$broadcast('editImprovement', leafletPayload);
-            //console.log("GeoJSON feature selected");
         });
 
-        $scope._obtainVeloprovements = function (eventName, args) {
-            var queryString = "dynamic/veloprovements?";
-            if (args instanceof Object) {
-                queryString += "southWestLat=" + args.southWest.lat + "&southWestLng=" + args.southWest.lng +
-                    "&northEastLat=" + args.northEast.lat + "&northEastLng=" + args.northEast.lng;
-            } else {
-                queryString += "southWestLat=" + $scope.bounds.southWest.lat + "&southWestLng=" + $scope.bounds.southWest.lng +
-                    "&northEastLat=" + $scope.bounds.northEast.lat + "&northEastLng=" + $scope.bounds.northEast.lng;
-            }
-
-            $http.get(queryString).then(function(response) {
-                    leafletData.getGeoJSON().then(function(geoJSON) {
-                        /*
-                        console.log(geoJSON);
-                        geoJSON.clearLayers();
-                        */
-                        /* TODO add improvemenet to database */
-                        geoJSON.clearLayers();
-                        geoJSON.addData(response.data);
+        $scope._obtainVeloprovements = function (eventName) {
+            leafletData.getMap("veloprovementsmap").then(function(map){
+                var queryString = "dynamic/veloprovements?";
+                var bounds = map.getBounds();
+                queryString += "southWestLat=" + bounds.getSouthWest().lat + "&southWestLng=" + bounds.getSouthWest().lng +
+                    "&northEastLat=" + bounds.getNorthEast().lat + "&northEastLng=" + bounds.getNorthEast().lng;
+                $http.get(queryString).then(function(response) {
+                        leafletData.getGeoJSON().then(function(geoJSON) {
+                            geoJSON.clearLayers();
+                            geoJSON.addData(response.data);
+                        });
                     });
-                });
+            });
         };
 
         angular.extend($scope, {
             bounds : {
-                southWest: {
-                    lat:48.19315601016896,
-                    lng: 15.609233379364012
-                },
-                northEast: {
-                    lat:48.20684324924357,
-                    lng:15.650753974914549
-                }
             },
             center : {
                 lat: 48.2,
@@ -120,28 +92,14 @@ angular.module('demoapp').controller('CreateImprovementCtrl',
                 ['$scope', 'panels', '$http', 'leafletData',
         function ($scope, panels, $http, leafletData) {
     $scope.$on('improvementCreate', function(event, element) {
-        /*
-        leafletData.getLayers().then(function(baselayers) {
-            var improvements = baselayers.overlays.improvements;
-            var layer = element.layer;
-            improvements.addLayer(layer);
-            console.log(JSON.stringify(layer.toGeoJSON()));
-            $scope.improvementType = layer.toGeoJSON().geometry.type;
-            panels.open('createImprovement');
-        });
-        */
         leafletData.getGeoJSON().then(function(geoJSON) {
-            /* TODO add improvemenet to database */
-            /*
-            geoJSON.addData(element.layer.toGeoJSON());
-            */
+            /* just in case */
         });
         $scope.newVeloprovement = element.layer.toGeoJSON();
         panels.open('createImprovement');
     });
 
     $scope.saveImprovement = function() {
-        //console.log("Storing new veloprovement: " + JSON.stringify($scope.newVeloprovement.geometry));
         $http.post("dynamic/veloprovements",
                 {
                     'geometry': $scope.newVeloprovement.geometry
