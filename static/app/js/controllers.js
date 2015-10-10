@@ -1,18 +1,33 @@
 angular.module('demoapp').controller("MainController",
-        [ "$scope", "$http", "leafletData", "leafletBoundsHelpers", "leafletEvents",
-        function($scope, $http, leafletData, leafletBoundsHelpers, leafletEvents) {
+        [ "$scope", "$http", "leafletData", "leafletBoundsHelpers", "leafletEvents", 'panels',
+        function($scope, $http, leafletData, leafletBoundsHelpers, leafletEvents, panels) {
 
         leafletData.getMap("veloprovementsmap").then(function(map) {
             map.on('draw:created', function (element) {
                 $scope.$broadcast('improvementCreate', element);
             });
-        });
 
-        $scope.keyboardAction = function(event) {
-            if (event.keyCode == 27 /* ESC */) {
-                $scope.$broadcast('cancelCurrentAction');
-            }
-        };
+            $scope.keyboardAction = function(event) {
+                switch(event.keyCode)
+                {
+                    case 27: /* ESC */
+                        $scope.$broadcast('cancelCurrentAction');
+                        break;
+                    case 48: /* 0 */
+                        if (panels.opened === undefined) {
+                            map.setZoom(16);
+                        }
+                        break;
+                    case 49: /* 1 */
+                        if (panels.opened === undefined) {
+                            map.setZoom(13);
+                        }
+                        break;
+                    cefault:
+                        break;
+                }
+            };
+        });
 
         $scope.$on('improvementCreated', function(event) {
             $scope._obtainVeloprovements(event.name);
