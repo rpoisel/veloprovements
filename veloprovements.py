@@ -6,9 +6,11 @@ from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy import func
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.dialects.postgresql.base import ischema_names
 from geoalchemy2.types import _GISType
 
 import json
+import datetime
 
 Base = declarative_base()
 
@@ -29,7 +31,7 @@ class VeloprovementsDb(object):
 
 class JSONGeometry(_GISType):
 
-    name = "jsongeometry"
+    name = "geometry"
 
     from_text = "ST_GeomFromGeoJSON"
 
@@ -43,6 +45,7 @@ class Veloprovement(Base):
     name = Column(String, nullable=False)
     description = Column(String)
     geom = Column(JSONGeometry, nullable=False)
+    created_date = Column(DateTime, default=datetime.datetime.utcnow)
 
 
 class Veloprovements(Resource):
@@ -104,11 +107,12 @@ class Veloprovements(Resource):
 
 app = Flask(__name__)
 api = Api(app)
-db = VeloprovementsDb(path='velo:velo@localhost/veloprovements')
+dbpath = 'velo:velo@localhost/veloprovements'
+db = VeloprovementsDb(path=dbpath)
 api.add_resource(Veloprovements, '/dynamic/veloprovements')
 
 if __name__ == "__main__":
-    db = VeloprovementsDb(path='velo:velo@lamaquina/veloprovements')
+    db = VeloprovementsDb(path=dbpath)
     session = db.getSession()
     session.add(Veloprovement(name='userdefined', description='bla', geom='{"type":"LineString","coordinates":[[1,2],[4,5],[7,8]]}'))
     for veloprovement in session.query(Veloprovement.name, Veloprovement.description, Veloprovement.geom.ST_AsGeoJSON()):
