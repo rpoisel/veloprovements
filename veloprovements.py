@@ -62,16 +62,17 @@ class Veloprovements(Resource):
             args['northEastLng'] is not None:
             session = db.getSession()
             for veloprovement in session.query(
-                    Veloprovement.name, Veloprovement.description, Veloprovement.geom.ST_AsGeoJSON()
+                    Veloprovement.id, Veloprovement.name, Veloprovement.description, Veloprovement.geom.ST_AsGeoJSON()
                     ).filter(Veloprovement.geom.ST_Intersects(func.ST_MakeEnvelope(
                         args['southWestLng'], args['southWestLat'], args['northEastLng'], args['northEastLat']))):
                 veloprovements.append({
                     "type": "Feature",
                     "properties": {
-                        "name": veloprovement[0],
-                        "description": veloprovement[1]
+                        "id": veloprovement[0],
+                        "name": veloprovement[1],
+                        "description": veloprovement[2]
                     },
-                    "geometry": json.loads(veloprovement[2])
+                    "geometry": json.loads(veloprovement[3])
                 })
             session.close();
         return {
@@ -88,7 +89,18 @@ class Veloprovements(Resource):
         session.add(Veloprovement(name='veloprovement', description='bla', geom=args['geometry']))
         session.commit()
         session.close();
-        #INSERT INTO veloprovements (name, description, geom) VALUES ( 'Europaplatz', 'Radwegfrei', ST_GeomFromGeoJSON('{"type":"Point","coordinates":[15.620176792144774,48.20100838448463]}'));
+
+    def delete(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('id', type=int)
+        args = parser.parse_args()
+
+        session = db.getSession()
+        veloprovement = session.query(Veloprovement).filter(Veloprovement.id == args['id']).first()
+        session.delete(veloprovement)
+        session.commit()
+        session.close();
+
 
 app = Flask(__name__)
 api = Api(app)

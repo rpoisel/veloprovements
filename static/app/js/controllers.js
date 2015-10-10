@@ -12,6 +12,10 @@ angular.module('demoapp').controller("MainController",
             $scope._obtainVeloprovements(event.name);
         });
 
+        $scope.$on('improvementDeleted', function(event) {
+            $scope._obtainVeloprovements(event.name);
+        });
+
         $scope.$on('leafletDirectiveMap.zoomend', function(event) {
             $scope._obtainVeloprovements(event.name);
         });
@@ -110,10 +114,21 @@ angular.module('demoapp').controller('CreateImprovementCtrl',
 }]);
 
 angular.module('demoapp').controller('EditImprovementCtrl',
-                ['$scope', 'panels', 'leafletData',
-        function ($scope, panels, leafletData) {
+                ['$scope', 'panels', '$http', 'leafletData',
+        function ($scope, panels, $http, leafletData) {
     $scope.$on('editImprovement', function(event, leafletPayload) {
+        $scope.editId = leafletPayload.model.properties.id;
         $scope.improvementName = leafletPayload.model.properties.name;
         panels.open('editImprovement');
     });
+    $scope.deleteImprovement = function() {
+        $http.delete("dynamic/veloprovements", {
+                "params" : {
+                    'id': $scope.editId
+                }
+            }).then(function(response) {
+                $scope.$emit('improvementDeleted');
+        });
+        panels.close("editImprovement");
+    }
 }]);
