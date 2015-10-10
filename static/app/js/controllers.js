@@ -8,6 +8,12 @@ angular.module('demoapp').controller("MainController",
             });
         });
 
+        $scope.keyboardAction = function(event) {
+            if (event.keyCode == 27 /* ESC */) {
+                $scope.$broadcast('cancelCurrentAction');
+            }
+        };
+
         $scope.$on('improvementCreated', function(event) {
             $scope._obtainVeloprovements(event.name);
         });
@@ -116,6 +122,10 @@ angular.module('demoapp').controller('CreateImprovementCtrl',
         });
         panels.close("createImprovement");
     }
+
+    $scope.$on('cancelCurrentAction', function(event) {
+        panels.close('createImprovement');
+    });
 }]);
 
 angular.module('demoapp').controller('EditImprovementCtrl',
@@ -136,4 +146,8 @@ angular.module('demoapp').controller('EditImprovementCtrl',
         });
         panels.close("editImprovement");
     }
+
+    $scope.$on('cancelCurrentAction', function(event) {
+        panels.close('editImprovement');
+    });
 }]);

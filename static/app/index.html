@@ -23,7 +23,7 @@
     <!-- endbuild -->
   </head>
 
-  <body ng-controller="MainController">
+  <body ng-controller="MainController" ng-keyup="keyboardAction($event)">
       <leaflet id="veloprovementsmap" controls="controls" bounds="bounds" layers="layers" geojson="geojson" lf-center="center"></leaflet>
       <div data-panels="true"></div>
   </body>
