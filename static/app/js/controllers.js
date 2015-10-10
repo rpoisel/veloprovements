@@ -52,7 +52,11 @@ angular.module('demoapp').controller("MainController",
                 zoom: 16
             },
             controls : {
-                draw : {}
+                draw : {
+                    draw: {
+                        circle: false
+                    }
+                }
             },
             layers : {
                 baselayers: {
