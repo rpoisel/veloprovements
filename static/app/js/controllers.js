@@ -89,6 +89,21 @@ angular.module('demoapp').controller("MainController",
                         name: 'OpenCycleMap',
                         url: 'http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png',
                         type: 'xyz'
+                    },
+                    googleTerrain: {
+                        name: 'Google Terrain',
+                        layerType: 'TERRAIN',
+                        type: 'google'
+                    },
+                    googleHybrid: {
+                        name: 'Google Hybrid',
+                        layerType: 'HYBRID',
+                        type: 'google'
+                    },
+                    googleRoadmap: {
+                        name: 'Google Streets',
+                        layerType: 'ROADMAP',
+                        type: 'google'
                     }
                 },
                 overlays : {
