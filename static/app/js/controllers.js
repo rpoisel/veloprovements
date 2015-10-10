@@ -107,9 +107,10 @@ angular.module('demoapp').controller('CreateImprovementCtrl',
         $http.post("dynamic/veloprovements",
                 {
                     'geometry': $scope.newVeloprovement.geometry
-                });
+                }).then(function(response) {
+            $scope.$emit('improvementCreated');
+        });
         panels.close("createImprovement");
-        $scope.$emit('improvementCreated');
     }
 }]);
 
