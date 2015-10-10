@@ -36,16 +36,20 @@ angular.module('demoapp').controller("MainController",
 
         $scope._obtainVeloprovements = function (eventName) {
             leafletData.getMap("veloprovementsmap").then(function(map){
-                var queryString = "dynamic/veloprovements?";
-                var bounds = map.getBounds();
-                queryString += "southWestLat=" + bounds.getSouthWest().lat + "&southWestLng=" + bounds.getSouthWest().lng +
-                    "&northEastLat=" + bounds.getNorthEast().lat + "&northEastLng=" + bounds.getNorthEast().lng;
-                $http.get(queryString).then(function(response) {
-                        leafletData.getGeoJSON().then(function(geoJSON) {
+                leafletData.getGeoJSON().then(function(geoJSON) {
+                    if (map.getZoom() < 13) {
+                        geoJSON.clearLayers();
+                        return;
+                    }
+                    var queryString = "dynamic/veloprovements?";
+                    var bounds = map.getBounds();
+                    queryString += "southWestLat=" + bounds.getSouthWest().lat + "&southWestLng=" + bounds.getSouthWest().lng +
+                        "&northEastLat=" + bounds.getNorthEast().lat + "&northEastLng=" + bounds.getNorthEast().lng;
+                    $http.get(queryString).then(function(response) {
                             geoJSON.clearLayers();
                             geoJSON.addData(response.data);
                         });
-                    });
+                });
             });
         };
 
