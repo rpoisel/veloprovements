@@ -15,10 +15,15 @@ angular.module('demoapp').controller("MainController",
                         break;
                     case 48: /* 0 */
                         if (panels.opened === undefined) {
-                            map.setZoom(16);
+                            map.setZoom(18);
                         }
                         break;
                     case 49: /* 1 */
+                        if (panels.opened === undefined) {
+                            map.setZoom(16);
+                        }
+                        break;
+                    case 50: /* 2 */
                         if (panels.opened === undefined) {
                             map.setZoom(13);
                         }
