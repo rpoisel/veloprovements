@@ -111,6 +111,15 @@ angular.module('demoapp').controller("MainController",
                         name: 'Google Streets',
                         layerType: 'ROADMAP',
                         type: 'google'
+                    },
+                    basemapAt: {
+                        name: 'Basemap Standard',
+                        url: 'http://maps{s}.wien.gv.at/basemap/geolandbasemap/normal/google3857/{z}/{y}/{x}.png',
+                        layerParams: {
+                            subdomains: '1234',
+                            attribution: '<a href="http://www.basemap.at">basemap.at</a>'
+                        },
+                        type: 'xyz'
                     }
                 },
                 overlays : {
