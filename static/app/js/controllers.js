@@ -25,6 +25,7 @@ angular.module('demoapp').controller("MainController",
                                 lat: DEFAULT.LAT,
                                 lon: DEFAULT.LNG,
                             }, DEFAULT.ZOOM);
+                            $scope._obtainVeloprovements('home');
                             break;
                         default:
                             console.log('keyboardAction ' + event.keyCode);
