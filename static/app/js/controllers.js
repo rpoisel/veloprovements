@@ -8,28 +8,30 @@ angular.module('demoapp').controller("MainController",
             });
 
             $scope.keyboardAction = function(event) {
-                switch(event.keyCode)
-                {
-                    case 27: /* ESC */
-                        $scope.$broadcast('cancelCurrentAction');
-                        break;
-                    case 48: /* 0 */
-                        if (panels.opened === undefined) {
+                if (panels.opened === undefined /* main view */) {
+                    switch(event.keyCode)
+                    {
+                        case 48: /* 0 */
                             map.setZoom(18);
-                        }
-                        break;
-                    case 49: /* 1 */
-                        if (panels.opened === undefined) {
+                            break;
+                        case 49: /* 1 */
                             map.setZoom(16);
-                        }
-                        break;
-                    case 50: /* 2 */
-                        if (panels.opened === undefined) {
+                            break;
+                        case 50: /* 2 */
                             map.setZoom(13);
-                        }
-                        break;
-                    cefault:
-                        break;
+                            break;
+                        case 72: /* h */
+                            map.setView({
+                                lat: 48.2,
+                                lon: 15.63
+                            }, 16);
+                            break;
+                        default:
+                            console.log('keyboardAction ' + event.keyCode);
+                            break;
+                    }
+                } else {
+                    $scope.$broadcast('keyboardAction', event.keyCode);
                 }
             };
         });
@@ -162,8 +164,10 @@ angular.module('demoapp').controller('CreateImprovementCtrl',
         panels.close("createImprovement");
     }
 
-    $scope.$on('cancelCurrentAction', function(event) {
-        panels.close('createImprovement');
+    $scope.$on('keyboardAction', function(event, keyCode) {
+        if (keyCode === 27) {
+            panels.close('createImprovement');
+        }
     });
 }]);
 
@@ -186,7 +190,9 @@ angular.module('demoapp').controller('EditImprovementCtrl',
         panels.close("editImprovement");
     }
 
-    $scope.$on('cancelCurrentAction', function(event) {
-        panels.close('editImprovement');
+    $scope.$on('keyboardAction', function(event, keyCode) {
+        if (keyCode === 27 /* ESC */) {
+            panels.close('editImprovement');
+        }
     });
 }]);
