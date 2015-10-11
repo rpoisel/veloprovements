@@ -1,5 +1,20 @@
 angular.module("demoapp", ['leaflet-directive', 'angular.panels']);
 
+angular.module('demoapp').constant("KEYS", {
+    "ABORT"     : 27 /* ESC */,
+    "HOME"      : 72 /* h */ ,
+    "ZOOM18"    : 48 /* 0 */,
+    "ZOOM16"    : 49 /* 1 */,
+    "ZOOM13"    : 50 /* 2 */
+});
+
+angular.module('demoapp').constant("DEFAULT", {
+    "ZOOM": 16,
+    "LAT": 48.2,
+    "LNG": 15.63,
+    "NOPOINTSZOOM": 13
+});
+
 angular.module('demoapp').config(['panelsProvider', function (panelsProvider) {
     panelsProvider
     .add({
