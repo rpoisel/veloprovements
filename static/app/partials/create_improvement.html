@@ -3,7 +3,15 @@
 </div>
 <div>
     <h1>Create Veloprovement</h1>
-    <label>Veloprovement name: </label>
-    <input type="text"/>
-    <button class="btn btn-primary" type="button" ng-click="saveImprovement()">Save</button>
+    <div>
+        <label>Name: </label>
+        <input type="text" name="veloprovementName" placeholder="Name" ng-model="name" required/>
+    </div>
+    <div>
+        <label>Description: </label><br />
+        <textarea name="veloprovementDescription" placeholder="Description" ng-model="description" cols="50" rows="4"></textarea>
+    </div>
+    <div>
+        <button class="btn btn-primary" type="button" ng-click="saveImprovement()">Save</button>
+    </div>
 </div>

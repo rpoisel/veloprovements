@@ -85,11 +85,13 @@ class Veloprovements(Resource):
 
     def post(self):
         parser = reqparse.RequestParser()
+        parser.add_argument('name', type=str)
+        parser.add_argument('description', type=str)
         parser.add_argument('geometry', type=str)
         args = parser.parse_args()
 
         session = db.getSession()
-        session.add(Veloprovement(name='veloprovement', description='bla', geom=args['geometry']))
+        session.add(Veloprovement(name=args['name'], description=args['description'], geom=args['geometry']))
         session.commit()
         session.close();
 

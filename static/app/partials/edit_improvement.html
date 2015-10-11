@@ -1,5 +1,18 @@
 <div class="pane-head">
     <button type="button" class="close" data-ng-click="panels.close();">×</button>
 </div>
-<h1>{{improvementName}}</h1>
-<button class="btn btn-primary" type="button" ng-click="deleteImprovement()">Delete</button>
+<div>
+    <h1>Edit Veloprovement</h1>
+    <div>
+        <label>Name: </label>
+        <input type="text" name="veloprovementName" placeholder="Name" ng-model="name" required/>
+    </div>
+    <div>
+        <label>Description: </label><br />
+        <textarea name="veloprovementDescription" placeholder="Description" ng-model="description" cols="50" rows="4"></textarea>
+    </div>
+    <div>
+        <button class="btn btn-primary" type="button" ng-click="">Update</button>
+        <button class="btn btn-danger" type="button" ng-click="deleteImprovement()">Delete</button>
+    </div>
+</div>
