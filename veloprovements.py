@@ -91,9 +91,12 @@ class Veloprovements(Resource):
         args = parser.parse_args()
 
         session = db.getSession()
-        session.add(Veloprovement(name=args['name'], description=args['description'], geom=args['geometry']))
+        veloprovement = Veloprovement(name=args['name'], description=args['description'], geom=args['geometry'])
+        session.add(veloprovement)
         session.commit()
+        retVal = veloprovement.id
         session.close();
+        return retVal
 
     def delete(self):
         parser = reqparse.RequestParser()
