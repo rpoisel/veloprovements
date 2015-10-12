@@ -2,37 +2,41 @@ angular.module('demoapp').controller("MainController",
         [ "$scope", "$http", "leafletData", "leafletBoundsHelpers", "leafletEvents", 'panels', "KEYS", "DEFAULT",
         function($scope, $http, leafletData, leafletBoundsHelpers, leafletEvents, panels, KEYS, DEFAULT) {
 
+        $scope.closePanel = true;
+
         leafletData.getMap("veloprovementsmap").then(function(map) {
             map.on('draw:created', function (element) {
                 $scope.$broadcast('improvementCreate', element);
             });
 
             $scope.keyboardAction = function(event) {
-                if (panels.opened === undefined /* main view */) {
-                    switch(event.keyCode)
-                    {
-                        case KEYS.ZOOM18:
-                            map.setZoom(18);
-                            break;
-                        case KEYS.ZOOM16:
-                            map.setZoom(16);
-                            break;
-                        case KEYS.ZOOM13:
-                            map.setZoom(13);
-                            break;
-                        case KEYS.HOME:
-                            map.setView({
-                                lat: DEFAULT.LAT,
-                                lon: DEFAULT.LNG,
-                            }, DEFAULT.ZOOM);
-                            $scope._obtainVeloprovements('home');
-                            break;
-                        default:
-                            console.log('keyboardAction ' + event.keyCode);
-                            break;
-                    }
-                } else {
-                    $scope.$broadcast('keyboardAction', event.keyCode);
+                switch(event.keyCode)
+                {
+                    case KEYS.ZOOM18:
+                        map.setZoom(18);
+                        break;
+                    case KEYS.ZOOM16:
+                        map.setZoom(16);
+                        break;
+                    case KEYS.ZOOM13:
+                        map.setZoom(13);
+                        break;
+                    case KEYS.HOME:
+                        map.setView({
+                            lat: DEFAULT.LAT,
+                            lon: DEFAULT.LNG,
+                        }, DEFAULT.ZOOM);
+                        $scope._obtainVeloprovements('home');
+                        break;
+                    case KEYS.ABORT:
+                        if ($scope.closePanel) {
+                            panels.close();
+                        } else {
+                            $scope.closePanel = true;
+                        }
+                        break;
+                    default:
+                        break;
                 }
             };
         });
@@ -154,8 +158,8 @@ angular.module('demoapp').controller("MainController",
 }]);
 
 angular.module('demoapp').controller('CreateImprovementCtrl',
-                ['$scope', 'panels', '$http', 'leafletData', 'KEYS',
-        function ($scope, panels, $http, leafletData, KEYS) {
+                ['$scope', 'panels', '$http', 'leafletData',
+        function ($scope, panels, $http, leafletData) {
     $scope.$on('improvementCreate', function(event, element) {
         leafletData.getGeoJSON().then(function(geoJSON) {
             /* just in case */
@@ -175,19 +179,13 @@ angular.module('demoapp').controller('CreateImprovementCtrl',
                 }).then(function(response) {
             $scope.$emit('improvementCreated');
         });
-        panels.close("createImprovement");
+        panels.close();
     }
-
-    $scope.$on('keyboardAction', function(event, keyCode) {
-        if (keyCode === KEYS.ABORT) {
-            panels.close('createImprovement');
-        }
-    });
 }]);
 
 angular.module('demoapp').controller('EditImprovementCtrl',
-                ['$scope', 'panels', '$http', 'leafletData', 'KEYS',
-        function ($scope, panels, $http, leafletData, KEYS) {
+                ['$scope', '$rootScope', 'panels', '$http', 'leafletData',
+        function ($scope, $rootScope, panels, $http, leafletData) {
     $scope.$on('editImprovement', function(event, leafletPayload) {
         $scope.editId = leafletPayload.model.properties.id;
         $scope.name = leafletPayload.model.properties.name;
@@ -202,12 +200,6 @@ angular.module('demoapp').controller('EditImprovementCtrl',
             }).then(function(response) {
                 $scope.$emit('improvementDeleted');
         });
-        panels.close("editImprovement");
+        panels.close();
     }
-
-    $scope.$on('keyboardAction', function(event, keyCode) {
-        if (keyCode === KEYS.ABORT) {
-            panels.close('editImprovement');
-        }
-    });
 }]);
