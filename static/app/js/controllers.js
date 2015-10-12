@@ -10,33 +10,41 @@ angular.module('demoapp').controller("MainController",
             });
 
             $scope.keyboardAction = function(event) {
-                switch(event.keyCode)
-                {
-                    case KEYS.ZOOM18:
-                        map.setZoom(18);
-                        break;
-                    case KEYS.ZOOM16:
-                        map.setZoom(16);
-                        break;
-                    case KEYS.ZOOM13:
-                        map.setZoom(13);
-                        break;
-                    case KEYS.HOME:
-                        map.setView({
-                            lat: DEFAULT.LAT,
-                            lon: DEFAULT.LNG,
-                        }, DEFAULT.ZOOM);
-                        $scope._obtainVeloprovements('home');
-                        break;
-                    case KEYS.ABORT:
-                        if ($scope.closePanel) {
-                            panels.close();
-                        } else {
-                            $scope.closePanel = true;
-                        }
-                        break;
-                    default:
-                        break;
+                if (panels.opened === undefined /* main view */) {
+                    switch(event.keyCode)
+                    {
+                        case KEYS.ZOOM18:
+                            map.setZoom(18);
+                            break;
+                        case KEYS.ZOOM16:
+                            map.setZoom(16);
+                            break;
+                        case KEYS.ZOOM13:
+                            map.setZoom(13);
+                            break;
+                        case KEYS.HOME:
+                            map.setView({
+                                lat: DEFAULT.LAT,
+                                lon: DEFAULT.LNG,
+                            }, DEFAULT.ZOOM);
+                            $scope._obtainVeloprovements('home');
+                            break;
+                        default:
+                            break;
+                    }
+                } else {
+                    switch(event.keyCode)
+                    {
+                        case KEYS.ABORT:
+                            if ($scope.closePanel) {
+                                panels.close();
+                            } else {
+                                $scope.closePanel = true;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
                 }
             };
         });
