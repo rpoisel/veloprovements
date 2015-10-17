@@ -108,6 +108,9 @@ angular.module('demoapp').controller("MainController",
                     openCycleMap: {
                         name: 'OpenCycleMap',
                         url: 'http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png',
+                        layerParams: {
+                            attribution: '&copy;&nbsp;<a href="http://www.openstreetmap.org/copyright">OpenStreetMap-Mitwirkende</a>,&nbsp;Tiles courtesy of&nbsp;<a href="http://www.thunderforst.com/" target="_blank">Andy Allen</a>'
+                        },
                         type: 'xyz'
                     },
                     googleTerrain: {
