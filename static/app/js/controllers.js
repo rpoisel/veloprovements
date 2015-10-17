@@ -1,12 +1,12 @@
 angular.module('demoapp').controller("MainController",
-        [ "$scope", "$http", "leafletData", "leafletBoundsHelpers", "leafletEvents", 'panels', "KEYS", "DEFAULT",
-        function($scope, $http, leafletData, leafletBoundsHelpers, leafletEvents, panels, KEYS, DEFAULT) {
+        [ "$scope", "$http", "leafletData", "leafletBoundsHelpers", "leafletEvents", 'panels', "KEYS", "DEFAULT", "APP_EVENTS",
+        function($scope, $http, leafletData, leafletBoundsHelpers, leafletEvents, panels, KEYS, DEFAULT, APP_EVENTS) {
 
         $scope.closePanel = true;
 
         leafletData.getMap("veloprovementsmap").then(function(map) {
             map.on('draw:created', function (element) {
-                $scope.$broadcast('improvementCreate', element);
+                $scope.$broadcast(APP_EVENTS.CREATE, element);
             });
 
             $scope.keyboardAction = function(event) {
@@ -49,11 +49,11 @@ angular.module('demoapp').controller("MainController",
             };
         });
 
-        $scope.$on('improvementCreated', function(event) {
+        $scope.$on(APP_EVENTS.CREATED, function(event) {
             $scope._obtainVeloprovements(event.name);
         });
 
-        $scope.$on('improvementDeleted', function(event) {
+        $scope.$on(APP_EVENTS.DELETED, function(event) {
             $scope._obtainVeloprovements(event.name);
         });
 
@@ -66,7 +66,7 @@ angular.module('demoapp').controller("MainController",
         });
 
         $scope.$on("leafletDirectiveGeoJson.click", function(ev, leafletPayload) {
-            $scope.$broadcast('editImprovement', leafletPayload);
+            $scope.$broadcast(APP_EVENTS.EDIT, leafletPayload);
         });
 
         $scope._obtainVeloprovements = function (eventName) {
@@ -169,9 +169,9 @@ angular.module('demoapp').controller("MainController",
 }]);
 
 angular.module('demoapp').controller('CreateImprovementCtrl',
-                ['$scope', 'panels', '$http', 'leafletData',
-        function ($scope, panels, $http, leafletData) {
-    $scope.$on('improvementCreate', function(event, element) {
+                ['$scope', 'panels', '$http', 'leafletData', 'APP_EVENTS',
+        function ($scope, panels, $http, leafletData, APP_EVENTS) {
+    $scope.$on(APP_EVENTS.CREATE, function(event, element) {
         leafletData.getGeoJSON().then(function(geoJSON) {
             /* just in case */
         });
@@ -188,16 +188,16 @@ angular.module('demoapp').controller('CreateImprovementCtrl',
                     'description': $scope.description,
                     'geometry': $scope.newVeloprovement.geometry
                 }).then(function(response) {
-            $scope.$emit('improvementCreated');
+            $scope.$emit(APP_EVENTS.CREATED);
         });
         panels.close();
     }
 }]);
 
 angular.module('demoapp').controller('EditImprovementCtrl',
-                ['$scope', '$rootScope', 'panels', '$http', 'leafletData',
-        function ($scope, $rootScope, panels, $http, leafletData) {
-    $scope.$on('editImprovement', function(event, leafletPayload) {
+                ['$scope', '$rootScope', 'panels', '$http', 'leafletData', 'APP_EVENTS',
+        function ($scope, $rootScope, panels, $http, leafletData, APP_EVENTS) {
+    $scope.$on(APP_EVENTS.EDIT, function(event, leafletPayload) {
         $scope.editId = leafletPayload.model.properties.id;
         $scope.name = leafletPayload.model.properties.name;
         $scope.description = leafletPayload.model.properties.description;
@@ -209,7 +209,7 @@ angular.module('demoapp').controller('EditImprovementCtrl',
                     'id': $scope.editId
                 }
             }).then(function(response) {
-                $scope.$emit('improvementDeleted');
+                $scope.$emit(APP_EVENTS.DELETED);
         });
         panels.close();
     }
