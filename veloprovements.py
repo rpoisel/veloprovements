@@ -1,5 +1,5 @@
 from flask import Flask
-from flask_restful import Resource, Api, reqparse
+from flask_restful import Resource, Api, reqparse, abort
 import psycopg2
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime
@@ -88,10 +88,14 @@ class Veloprovements(Resource):
         parser.add_argument('name', type=str)
         parser.add_argument('description', type=str)
         parser.add_argument('geometry', type=str)
+        parser.add_argument('username', type=str)
+        parser.add_argument('password', type=str)
         args = parser.parse_args()
 
         session = db.getSession()
         veloprovement = Veloprovement(name=args['name'], description=args['description'], geom=args['geometry'])
+        if args['username'] is not None and args['password'] is not None:
+            print("Authentication: " + args['username'] + ", " + args['password']);
         session.add(veloprovement)
         session.commit()
         retVal = veloprovement.id
@@ -110,11 +114,31 @@ class Veloprovements(Resource):
         session.close();
 
 
+class VeloprovementsLogin(Resource):
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('username', type=str)
+        parser.add_argument('password', type=str)
+        args = parser.parse_args()
+
+        if args['username'] == 'test' and args['password'] == 'test':
+            return {
+                    'id': '23',
+                    'user': {
+                        'id': '42',
+                        'role': 'editor'
+                    }
+                }
+        abort(401, message='unauthorized')
+
+
 app = Flask(__name__)
+app.config['PROPAGATE_EXCEPTIONS'] = True
 api = Api(app)
 dbpath = 'velo:velo@localhost/veloprovements'
 db = VeloprovementsDb(path=dbpath)
 api.add_resource(Veloprovements, '/dynamic/veloprovements')
+api.add_resource(VeloprovementsLogin, '/dynamic/veloprovements/login')
 
 if __name__ == "__main__":
     db = VeloprovementsDb(path=dbpath)

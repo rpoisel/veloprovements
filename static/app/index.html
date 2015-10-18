@@ -22,6 +22,7 @@
 
     <!-- build:js -->
     <script src="js/app.js"></script>
+    <script src="js/services.js"></script>
     <script src="js/directives.js"></script>
     <script src="js/controllers.js"></script>
     <!-- endbuild -->
@@ -30,5 +31,16 @@
   <body ng-controller="MainController" ng-keyup="keyboardAction($event)">
       <leaflet id="veloprovementsmap" controls="controls" bounds="bounds" layers="layers" geojson="geojson" lf-center="center"></leaflet>
       <div data-panels="true"></div>
+
+      <div class="leaflet-left leaflet-bottom">
+          <div class="leaflet-control-zoom leaflet-bar leaflet-control">
+              <div ng-if="!isAuthenticated()">
+                  <a class="leaflet-control-zoom-in veloprovements-a" ng-click="openLoginPanel()" title="Login">L</a>
+              </div>
+              <div ng-if="isAuthenticated()">
+                  <a class="leaflet-control-zoom-in veloprovements-a" ng-click="logout()" title="Login">X</a>
+              </div>
+          </div>
+      </div>
   </body>
 </html>

@@ -11,8 +11,10 @@
         <label>Description: </label><br />
         <textarea name="veloprovementDescription" placeholder="Description" ng-model="description" cols="50" rows="4"></textarea>
     </div>
-    <div>
-        <button class="btn btn-primary" type="button" ng-click="">Update</button>
-        <button class="btn btn-danger" type="button" confirmed-click="deleteImprovement()" ng-confirm-click="Would you like to delete this veloprovement?">Delete</button>
+    <div ng-if="isAuthenticated()">
+        <div>
+            <button class="btn btn-primary" type="button" ng-click="">Update</button>
+            <button class="btn btn-danger" type="button" confirmed-click="deleteImprovement()" ng-confirm-click="Would you like to delete this veloprovement?">Delete</button>
+        </div>
     </div>
 </div>

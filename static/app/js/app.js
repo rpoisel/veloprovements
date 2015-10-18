@@ -20,7 +20,24 @@ angular.module('demoapp').constant("APP_EVENTS", {
     "CREATED": "veloCreated",
     "EDIT": "veloEdit",
     "DELETED": "veloDeleted",
+    "LOGIN": 'veloLogin'
 });
+
+angular.module('demoapp').constant("USER_ROLES", {
+    all: '*',
+    admin: 'admin',
+    editor: 'editor',
+    guest: 'guest'
+});
+
+angular.module("demoapp").constant('AUTH_EVENTS', {
+    loginSuccess: 'auth-login-success',
+    loginFailed: 'auth-login-failed',
+    logoutSuccess: 'auth-logout-success',
+    sessionTimeout: 'auth-session-timeout',
+    notAuthenticated: 'auth-not-authenticated',
+    notAuthorized: 'auth-not-authorized'
+})
 
 angular.module('demoapp').config(['panelsProvider', function (panelsProvider) {
     panelsProvider
@@ -37,5 +54,12 @@ angular.module('demoapp').config(['panelsProvider', function (panelsProvider) {
         size: '700px',
         templateUrl: '/partials/edit_improvement.html',
         controller: 'EditImprovementCtrl'
+    })
+    .add({
+        id: 'login',
+        position: 'left',
+        size: '700px',
+        templateUrl: '/partials/login.html',
+        controller: 'LoginCtrl'
     });
 }]);

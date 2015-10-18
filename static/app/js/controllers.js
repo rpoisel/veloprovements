@@ -1,8 +1,19 @@
 angular.module('demoapp').controller("MainController",
-        [ "$scope", "$http", "leafletData", "leafletBoundsHelpers", "leafletEvents", 'panels', "KEYS", "DEFAULT", "APP_EVENTS",
-        function($scope, $http, leafletData, leafletBoundsHelpers, leafletEvents, panels, KEYS, DEFAULT, APP_EVENTS) {
+        [ "$scope",
+            "leafletData", "leafletBoundsHelpers", "leafletEvents",
+            'panels', "AuthService", 'Veloprovements',
+            "KEYS", "DEFAULT", "APP_EVENTS", "USER_ROLES",
+        function($scope, leafletData, leafletBoundsHelpers, leafletEvents, panels, AuthService, Veloprovements, KEYS, DEFAULT, APP_EVENTS, USER_ROLES) {
 
         $scope.closePanel = true;
+        $scope.currentUser = null;
+        $scope.userRoles = USER_ROLES;
+        $scope.isAuthorized = AuthService.isAuthorized;
+        $scope.isAuthenticated = AuthService.isAuthenticated;
+
+        $scope.setCurrentUser = function(user) {
+            $scope.currentUser = user;
+        };
 
         leafletData.getMap("veloprovementsmap").then(function(map) {
             map.on('draw:created', function (element) {
@@ -27,7 +38,7 @@ angular.module('demoapp').controller("MainController",
                                 lat: DEFAULT.LAT,
                                 lon: DEFAULT.LNG,
                             }, DEFAULT.ZOOM);
-                            $scope._obtainVeloprovements('home');
+                            $scope._populateVeloprovements('home');
                             break;
                         default:
                             break;
@@ -50,43 +61,48 @@ angular.module('demoapp').controller("MainController",
         });
 
         $scope.$on(APP_EVENTS.CREATED, function(event) {
-            $scope._obtainVeloprovements(event.name);
+            $scope._populateVeloprovements(event.name);
         });
 
         $scope.$on(APP_EVENTS.DELETED, function(event) {
-            $scope._obtainVeloprovements(event.name);
+            $scope._populateVeloprovements(event.name);
         });
 
         $scope.$on('leafletDirectiveMap.zoomend', function(event) {
-            $scope._obtainVeloprovements(event.name);
+            $scope._populateVeloprovements(event.name);
         });
 
         $scope.$on('leafletDirectiveMap.dragend', function(event) {
-            $scope._obtainVeloprovements(event.name);
+            $scope._populateVeloprovements(event.name);
         });
 
         $scope.$on("leafletDirectiveGeoJson.click", function(ev, leafletPayload) {
             $scope.$broadcast(APP_EVENTS.EDIT, leafletPayload);
         });
 
-        $scope._obtainVeloprovements = function (eventName) {
+        $scope._populateVeloprovements = function (eventName) {
             leafletData.getMap("veloprovementsmap").then(function(map){
                 leafletData.getGeoJSON().then(function(geoJSON) {
                     if (map.getZoom() < DEFAULT.NOPOINTSZOOM) {
                         geoJSON.clearLayers();
                         return;
                     }
-                    var queryString = "dynamic/veloprovements?";
-                    var bounds = map.getBounds();
-                    queryString += "southWestLat=" + bounds.getSouthWest().lat + "&southWestLng=" + bounds.getSouthWest().lng +
-                        "&northEastLat=" + bounds.getNorthEast().lat + "&northEastLng=" + bounds.getNorthEast().lng;
-                    $http.get(queryString).then(function(response) {
+                    Veloprovements.obtain(map.getBounds())
+                        .then(function(veloprovements) {
                             geoJSON.clearLayers();
-                            geoJSON.addData(response.data);
+                            geoJSON.addData(veloprovements);
                         });
                 });
             });
         };
+
+        $scope.openLoginPanel = function() {
+            $scope.$broadcast(APP_EVENTS.LOGIN);
+        };
+
+        $scope.logout = function() {
+            AuthService.logout();
+        }
 
         angular.extend($scope, {
             bounds : {
@@ -169,8 +185,8 @@ angular.module('demoapp').controller("MainController",
 }]);
 
 angular.module('demoapp').controller('CreateImprovementCtrl',
-                ['$scope', 'panels', '$http', 'leafletData', 'APP_EVENTS',
-        function ($scope, panels, $http, leafletData, APP_EVENTS) {
+                ['$scope', 'panels', 'leafletData', 'APP_EVENTS', 'Veloprovements',
+        function ($scope, panels, leafletData, APP_EVENTS, Veloprovements) {
     $scope.$on(APP_EVENTS.CREATE, function(event, element) {
         leafletData.getGeoJSON().then(function(geoJSON) {
             /* just in case */
@@ -182,35 +198,63 @@ angular.module('demoapp').controller('CreateImprovementCtrl',
     });
 
     $scope.saveImprovement = function() {
-        $http.post("dynamic/veloprovements",
-                {
-                    'name': $scope.name,
-                    'description': $scope.description,
-                    'geometry': $scope.newVeloprovement.geometry
-                }).then(function(response) {
-            $scope.$emit(APP_EVENTS.CREATED);
-        });
+        Veloprovements.create($scope.name, $scope.description, $scope.newVeloprovement.geometry)
+            .then(function(response) {
+                $scope.$emit(APP_EVENTS.CREATED);
+            });
         panels.close();
-    }
+    };
 }]);
 
 angular.module('demoapp').controller('EditImprovementCtrl',
-                ['$scope', '$rootScope', 'panels', '$http', 'leafletData', 'APP_EVENTS',
-        function ($scope, $rootScope, panels, $http, leafletData, APP_EVENTS) {
+                ['$scope', '$rootScope', 'panels', 'leafletData', 'APP_EVENTS', 'Veloprovements',
+        function ($scope, $rootScope, panels, leafletData, APP_EVENTS, Veloprovements) {
     $scope.$on(APP_EVENTS.EDIT, function(event, leafletPayload) {
         $scope.editId = leafletPayload.model.properties.id;
         $scope.name = leafletPayload.model.properties.name;
         $scope.description = leafletPayload.model.properties.description;
         panels.open('editImprovement');
     });
+
     $scope.deleteImprovement = function() {
-        $http.delete("dynamic/veloprovements", {
-                "params" : {
-                    'id': $scope.editId
-                }
-            }).then(function(response) {
+        Veloprovements.remove($scope.editId)
+            .then(function(response) {
                 $scope.$emit(APP_EVENTS.DELETED);
-        });
+            });
         panels.close();
     }
+
+    $scope.isAuthorized = $scope.$parent.$parent.isAuthorized;
+    $scope.isAuthenticated = $scope.$parent.$parent.isAuthenticated;
+}]);
+
+angular.module('demoapp').controller('LoginCtrl',
+                ['$scope', '$rootScope', 'panels', 'leafletData', 'AuthService', 'APP_EVENTS', 'AUTH_EVENTS',
+        function ($scope, $rootScope, panels, leafletData, AuthService, APP_EVENTS, AUTH_EVENTS) {
+    $scope.credentials = {
+        username: '',
+        password: ''
+    };
+
+    $scope.login = function(credentials) {
+        AuthService.login(credentials).then(function (user) {
+            $scope.$parent.$parent.setCurrentUser(user);
+            $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+            $scope.credentials = {
+                username: '',
+                password: ''
+            };
+            panels.close();
+        }, function () {
+            $rootScope.$broadcast(AUTH_EVENTS.loginFailed);
+            /* show error message in panel */
+        });
+    };
+
+    $scope.$on(APP_EVENTS.LOGIN, function(event) {
+        panels.open('login');
+    });
+
+    $scope.isAuthorized = $scope.$parent.$parent.isAuthorized;
+    $scope.isAuthenticated = $scope.$parent.$parent.isAuthenticated;
 }]);
