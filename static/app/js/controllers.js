@@ -123,9 +123,9 @@ angular.module('demoapp').controller("MainController",
                 baselayers: {
                     openCycleMap: {
                         name: 'OpenCycleMap',
-                        url: 'http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png',
+                        url: 'https://{s}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png',
                         layerParams: {
-                            attribution: '&copy;&nbsp;<a href="http://www.openstreetmap.org/copyright">OpenStreetMap-Mitwirkende</a>,&nbsp;Tiles courtesy of&nbsp;<a href="http://www.thunderforst.com/" target="_blank">Andy Allen</a>'
+                            attribution: '&copy;&nbsp;<a href="https://www.openstreetmap.org/copyright">OpenStreetMap-Mitwirkende</a>,&nbsp;Tiles courtesy of&nbsp;<a href="https://www.thunderforst.com/" target="_blank">Andy Allen</a>'
                         },
                         type: 'xyz'
                     },
@@ -146,10 +146,10 @@ angular.module('demoapp').controller("MainController",
                     },
                     basemapAt: {
                         name: 'Basemap Standard',
-                        url: 'http://maps{s}.wien.gv.at/basemap/geolandbasemap/normal/google3857/{z}/{y}/{x}.png',
+                        url: 'https://maps{s}.wien.gv.at/basemap/geolandbasemap/normal/google3857/{z}/{y}/{x}.png',
                         layerParams: {
                             subdomains: '1234',
-                            attribution: '<a href="http://www.basemap.at">basemap.at</a>'
+                            attribution: '<a href="https://www.basemap.at">basemap.at</a>'
                         },
                         type: 'xyz'
                     }
