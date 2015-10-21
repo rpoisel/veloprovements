@@ -1,15 +1,17 @@
 angular.module('demoapp').controller("MainController",
-        [ "$scope",
+        [ "$scope", "$rootScope",
             "leafletData", "leafletBoundsHelpers", "leafletEvents",
             'panels', "AuthService", 'Veloprovements',
-            "KEYS", "DEFAULT", "APP_EVENTS", "USER_ROLES",
-        function($scope, leafletData, leafletBoundsHelpers, leafletEvents, panels, AuthService, Veloprovements, KEYS, DEFAULT, APP_EVENTS, USER_ROLES) {
+            "KEYS", "DEFAULT", "APP_EVENTS", "AUTH_EVENTS", "USER_ROLES",
+        function($scope, $rootScope, leafletData, leafletBoundsHelpers, leafletEvents, panels,
+            AuthService, Veloprovements, KEYS, DEFAULT, APP_EVENTS, AUTH_EVENTS, USER_ROLES) {
 
         $scope.closePanel = true;
         $scope.currentUser = null;
         $scope.userRoles = USER_ROLES;
         $scope.isAuthorized = AuthService.isAuthorized;
         $scope.isAuthenticated = AuthService.isAuthenticated;
+        $scope.drawControl = null;
 
         $scope.setCurrentUser = function(user) {
             $scope.currentUser = user;
@@ -58,6 +60,28 @@ angular.module('demoapp').controller("MainController",
                     }
                 }
             };
+
+            $scope.$on(AUTH_EVENTS.loginSuccess, function(event) {
+                 $scope.drawControl = new L.Control.Draw({
+                    draw : {
+                        position : 'topleft',
+                        polygon : true,
+                        polyline : true,
+                        rectangle : true,
+                        circle : false
+
+                    },
+                    edit : false
+                });
+                map.addControl($scope.drawControl);
+            });
+
+            $scope.$on(AUTH_EVENTS.logoutSuccess, function() {
+                if ($scope.drawControl) {
+                    map.removeControl($scope.drawControl);
+                    $scope.drawControl = null;
+                }
+            });
         });
 
         $scope.$on(APP_EVENTS.CREATED, function(event) {
@@ -102,7 +126,8 @@ angular.module('demoapp').controller("MainController",
 
         $scope.logout = function() {
             AuthService.logout();
-        }
+            $rootScope.$broadcast(AUTH_EVENTS.logoutSuccess);
+        };
 
         angular.extend($scope, {
             bounds : {
@@ -111,13 +136,6 @@ angular.module('demoapp').controller("MainController",
                 lat: DEFAULT.LAT,
                 lng: DEFAULT.LNG,
                 zoom: DEFAULT.ZOOM
-            },
-            controls : {
-                draw : {
-                    draw: {
-                        circle: false
-                    }
-                }
             },
             layers : {
                 baselayers: {
