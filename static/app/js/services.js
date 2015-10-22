@@ -87,3 +87,14 @@ angular.module('demoapp').factory('Veloprovements', function ($http, Session) {
 
     return veloprovements;
 });
+
+angular.module('demoapp').factory('focus', function ($timeout, $window) {
+    return function(id) {
+        $timeout(function() {
+            var element = $window.document.getElementById(id);
+            if (element) {
+                element.focus();
+            }
+        });
+    };
+});

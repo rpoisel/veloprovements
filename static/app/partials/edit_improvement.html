@@ -5,11 +5,11 @@
     <h1>Edit Veloprovement</h1>
     <div>
         <label>Name: </label>
-        <input type="text" name="veloprovementName" placeholder="Name" ng-model="name" required/>
+        <input type="text" id="editVeloprovementName" placeholder="Name" ng-model="name" required/>
     </div>
     <div>
         <label>Description: </label><br />
-        <textarea name="veloprovementDescription" placeholder="Description" ng-model="description" cols="50" rows="4"></textarea>
+        <textarea id="editVeloprovementDescription" placeholder="Description" ng-model="description" cols="50" rows="4"></textarea>
     </div>
     <div ng-if="isAuthenticated()">
         <div>

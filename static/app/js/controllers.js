@@ -203,8 +203,8 @@ angular.module('demoapp').controller("MainController",
 }]);
 
 angular.module('demoapp').controller('CreateImprovementCtrl',
-                ['$scope', 'panels', 'leafletData', 'APP_EVENTS', 'Veloprovements',
-        function ($scope, panels, leafletData, APP_EVENTS, Veloprovements) {
+                ['$scope', 'panels', 'focus', 'leafletData', 'APP_EVENTS', 'Veloprovements',
+        function ($scope, panels, focus, leafletData, APP_EVENTS, Veloprovements) {
     $scope.$on(APP_EVENTS.CREATE, function(event, element) {
         leafletData.getGeoJSON().then(function(geoJSON) {
             /* just in case */
@@ -213,6 +213,7 @@ angular.module('demoapp').controller('CreateImprovementCtrl',
         $scope.name = '';
         $scope.description = '';
         panels.open('createImprovement');
+        focus('createVeloprovementName');
     });
 
     $scope.saveImprovement = function() {
@@ -225,13 +226,14 @@ angular.module('demoapp').controller('CreateImprovementCtrl',
 }]);
 
 angular.module('demoapp').controller('EditImprovementCtrl',
-                ['$scope', '$rootScope', 'panels', 'leafletData', 'APP_EVENTS', 'Veloprovements',
-        function ($scope, $rootScope, panels, leafletData, APP_EVENTS, Veloprovements) {
+                ['$scope', '$rootScope', 'panels', 'focus', 'leafletData', 'APP_EVENTS', 'Veloprovements',
+        function ($scope, $rootScope, panels, focus, leafletData, APP_EVENTS, Veloprovements) {
     $scope.$on(APP_EVENTS.EDIT, function(event, leafletPayload) {
         $scope.editId = leafletPayload.model.properties.id;
         $scope.name = leafletPayload.model.properties.name;
         $scope.description = leafletPayload.model.properties.description;
         panels.open('editImprovement');
+        focus('editVeloprovementName');
     });
 
     $scope.deleteImprovement = function() {
@@ -247,8 +249,8 @@ angular.module('demoapp').controller('EditImprovementCtrl',
 }]);
 
 angular.module('demoapp').controller('LoginCtrl',
-                ['$scope', '$rootScope', 'panels', 'leafletData', 'AuthService', 'APP_EVENTS', 'AUTH_EVENTS',
-        function ($scope, $rootScope, panels, leafletData, AuthService, APP_EVENTS, AUTH_EVENTS) {
+                ['$scope', '$rootScope', 'panels', 'focus', 'leafletData', 'AuthService', 'APP_EVENTS', 'AUTH_EVENTS',
+        function ($scope, $rootScope, panels, focus, leafletData, AuthService, APP_EVENTS, AUTH_EVENTS) {
     $scope.credentials = {
         username: '',
         password: ''
@@ -271,6 +273,7 @@ angular.module('demoapp').controller('LoginCtrl',
 
     $scope.$on(APP_EVENTS.LOGIN, function(event) {
         panels.open('login');
+        focus('login_username');
     });
 
     $scope.isAuthorized = $scope.$parent.$parent.isAuthorized;
