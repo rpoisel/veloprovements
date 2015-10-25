@@ -1,4 +1,4 @@
-angular.module('demoapp').factory('AuthService', function ($http, Session) {
+angular.module('demoapp').factory('AuthService', ['$http', 'Session', function ($http, Session) {
     var authService = {};
 
     authService.login = function (credentials) {
@@ -28,7 +28,7 @@ angular.module('demoapp').factory('AuthService', function ($http, Session) {
     };
 
     return authService;
-});
+}]);
 
 angular.module("demoapp").service('Session', function () {
 
@@ -46,11 +46,11 @@ angular.module("demoapp").service('Session', function () {
     };
 });
 
-angular.module('demoapp').factory('Veloprovements', function ($http, Session) {
+angular.module('demoapp').factory('Veloprovements', ['$http', 'Session', function ($http, Session) {
     var veloprovements = {};
 
     veloprovements.obtain = function(bounds) {
-        var queryString = "dynamic/veloprovements?";
+        var queryString = "/dynamic/veloprovements?";
         queryString += "southWestLat=" + bounds.getSouthWest().lat + "&southWestLng=" + bounds.getSouthWest().lng +
             "&northEastLat=" + bounds.getNorthEast().lat + "&northEastLng=" + bounds.getNorthEast().lng;
         return $http.get(queryString)
@@ -60,7 +60,7 @@ angular.module('demoapp').factory('Veloprovements', function ($http, Session) {
     };
 
     veloprovements.create = function(name, description, geometry) {
-        return $http.post("dynamic/veloprovements", {
+        return $http.post("/dynamic/veloprovements", {
             'name': name,
             'description': description,
             'geometry': geometry,
@@ -74,7 +74,7 @@ angular.module('demoapp').factory('Veloprovements', function ($http, Session) {
     };
 
     veloprovements.remove = function(id) {
-        return $http.delete("dynamic/veloprovements", {
+        return $http.delete("/dynamic/veloprovements", {
                 "params" : {
                     'id': id,
                     'username': (Session.credentials ? Session.credentials.username : null),
@@ -86,9 +86,9 @@ angular.module('demoapp').factory('Veloprovements', function ($http, Session) {
     };
 
     return veloprovements;
-});
+}]);
 
-angular.module('demoapp').factory('focus', function ($timeout, $window) {
+angular.module('demoapp').factory('focus', ['$timeout', '$window', function ($timeout, $window) {
     return function(id) {
         $timeout(function() {
             var element = $window.document.getElementById(id);
@@ -97,4 +97,4 @@ angular.module('demoapp').factory('focus', function ($timeout, $window) {
             }
         });
     };
-});
+}]);

@@ -2,21 +2,6 @@
 // jsConcatFiles => list of javascript files (in order) to concatenate
 // // /////////////////////////////////////////////
 
-var config = {
-	jsConcatFiles: [
-            'app/js/app.js',
-            'app/js/controllers.js'
-	], 
-        distFilesBowerCopy: [
-            'app/bower_components/leaflet/dist/leaflet.js',
-            'app/bower_components/leaflet/dist/leaflet.css',
-            'app/bower_components/angular/angular.min.js',
-            'app/bower_components/angular-simple-logger/dist/angular-simple-logger.min.js',
-            'app/bower_components/angular-leaflet-directive/dist/angular-leaflet-directive.min.js'
-        ]
-};
-
-
 // ////////////////////////////////////////////////
 // Required taskes
 // gulp dist
@@ -34,8 +19,49 @@ var gulp = require('gulp'),
 	rename = require('gulp-rename'),
         clean = require('gulp-clean'),
         htmlReplace = require('gulp-html-replace'),
-        taskListing = require('gulp-task-listing');
+        taskListing = require('gulp-task-listing'),
+        fs = require('fs'),
+        userHome = require("user-home"),
+        GulpSSH = require("gulp-ssh"),
+        zip = require('gulp-zip'),
+        exec = require('child_process').exec;
 
+var config = {
+	jsConcatFiles: [
+            'app/js/app.js',
+            'app/js/controllers.js',
+            'app/js/directives.js',
+            'app/js/services.js'
+	],
+        distFilesBowerCopy: [
+            'app/bower_components/bootstrap/dist/css/bootstrap.min.css',
+            'app/bower_components/bootstrap/dist/js/bootstrap.min.js',
+            'app/bower_components/jquery/dist/jquery.min.js',
+            'app/bower_components/angular/angular.min.js',
+            'app/bower_components/angular-simple-logger/dist/angular-simple-logger.min.js',
+            'app/bower_components/leaflet/dist/leaflet.js',
+            'app/bower_components/leaflet/dist/leaflet.css',
+            'app/bower_components/leaflet/dist/images/**',
+            'app/bower_components/leaflet-plugins/layer/tile/Google.js',
+            'app/bower_components/leaflet-draw/dist/leaflet.draw.js',
+            'app/bower_components/leaflet-draw/dist/leaflet.draw.css',
+            'app/bower_components/leaflet-draw/dist/images/**',
+            'app/bower_components/angular-leaflet-directive/dist/angular-leaflet-directive.min.js',
+            'app/bower_components/angular.panels/dist/angular.panels.min.js',
+            'app/bower_components/angular.panels/dist/angular.panels.min.css'
+        ],
+        sshOptions: {
+            host: 'lamaquina',
+            port: 22,
+            username: 'user',
+            privateKey: fs.readFileSync(userHome + "/.ssh/id_rsa")
+        }
+};
+
+var gulpSSH = new GulpSSH({
+    ignoreErrors: false,
+    sshConfig: config.sshOptions
+});
 
 // ////////////////////////////////////////////////
 // Utility tasks
@@ -113,25 +139,41 @@ gulp.task('dist:serve', function() {
 // // /////////////////////////////////////////////
 
 // clean out all files and folders from dist folder
-gulp.task('dist:cleanfolder', function () {
-    return gulp.src('dist/**', { read: false}).
-        pipe(clean());
+gulp.task('dist:cleanfolder', function (cb) {
+    exec('rm -rf dist', function(err, stdout, stderr) {
+    console.log(stdout);
+    console.log(stderr);
+    cb(err);
+    });
 });
 
 // task to create dist directory of all files
 gulp.task('dist:copy', ['scripts', 'replace-html'], function(){
     return gulp.src(
-        ['app/!(bower_components)/*/','!app/index.html', '!app/js/app.js', '!app/js/controllers.js']
+        [
+        'app/!(bower_components)/*/',
+        '!app/index.html',
+        '!app/js/app.js',
+        '!app/js/controllers.js',
+        '!app/js/directives.js',
+        '!app/js/services.js'
+        ]
     )
     .pipe(gulp.dest('dist/'));
 });
 
 gulp.task('dist:copy-components', ['scripts', 'replace-html'], function () {
-    return gulp.src(config.distFilesBowerCopy, { base: 'app/bower_components/'}).
-        pipe(gulp.dest('dist/bower_components'));
+    return gulp.src(config.distFilesBowerCopy, { base: 'app/bower_components/'})
+        .pipe(gulp.dest('dist/bower_components'));
 });
 
+
 gulp.task('dist', ['dist:copy', 'dist:copy-components']);
+gulp.task('dist:zip', ['dist'], function () {
+    return gulp.src('dist/**/*')
+        .pipe(zip('veloprovements-dist.zip'))
+        .pipe(gulp.dest('.'));
+});
 
 // ////////////////////////////////////////////////
 // Watch Tasks
@@ -142,5 +184,24 @@ gulp.task ('watch', function(){
   	gulp.watch('app/**/*.html', ['html']);
 });
 
-
 gulp.task('default', ['scripts', 'html', 'browser-sync', 'watch']);
+
+// ////////////////////////////////////////////////
+// Remote Tasks
+// // /////////////////////////////////////////////
+
+gulp.task('remote:deploy', ['remote:transfer']);
+gulp.task('remote:transfer', ['dist', 'remote:cleanup'], function () {
+    return gulp.src('dist/**/*')
+        .pipe(gulpSSH.dest('/var/www/veloprovements/static'))
+});
+
+gulp.task('remote:cleanup', function() {
+    return gulpSSH
+        .exec([
+            'rm -rf /var/www/veloprovements/static/*'
+            ],
+        {filePath: 'commands.log'})
+        .pipe(gulp.dest('logs'))
+});
+
