@@ -2,6 +2,7 @@
 <html ng-app="demoapp">
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veloprovements</title>
 
     <link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="bower_components/leaflet/dist/leaflet.css" />
@@ -33,7 +34,7 @@
       <div data-panels="true"></div>
 
       <div class="leaflet-left leaflet-bottom">
-          <div class="leaflet-control-zoom leaflet-bar leaflet-control">
+          <div class="leaflet-control-zoom leaflet-bar leaflet-control" id="userAction">
               <div ng-if="!isAuthenticated()">
                   <a class="leaflet-control-zoom-in veloprovements-a" ng-click="openLoginPanel()" title="Login">L</a>
               </div>
