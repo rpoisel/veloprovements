@@ -50,17 +50,28 @@ var config = {
             'app/bower_components/angular.panels/dist/angular.panels.min.js',
             'app/bower_components/angular.panels/dist/angular.panels.min.css'
         ],
-        sshOptions: {
+        sshOptionsUser: {
             host: 'lamaquina',
             port: 22,
             username: 'user',
             privateKey: fs.readFileSync(userHome + "/.ssh/id_rsa")
+        },
+        sshOptionsRoot: {
+            host: 'lamaquina',
+            port: 22,
+            username: 'root',
+            privateKey: fs.readFileSync(userHome + "/.ssh/id_rsa")
         }
 };
 
-var gulpSSH = new GulpSSH({
+var gulpSSHUser = new GulpSSH({
     ignoreErrors: false,
-    sshConfig: config.sshOptions
+    sshConfig: config.sshOptionsUser
+});
+
+var gulpSSHRoot = new GulpSSH({
+    ignoreErrors: false,
+    sshConfig: config.sshOptionsRoot
 });
 
 // ////////////////////////////////////////////////
@@ -190,14 +201,16 @@ gulp.task('default', ['scripts', 'html', 'browser-sync', 'watch']);
 // Remote Tasks
 // // /////////////////////////////////////////////
 
+gulp.task('remote:deploy-all', ['remote:deploy', 'remote:deploy-python']);
+
 gulp.task('remote:deploy', ['remote:transfer']);
 gulp.task('remote:transfer', ['dist', 'remote:cleanup'], function () {
     return gulp.src('dist/**/*')
-        .pipe(gulpSSH.dest('/var/www/veloprovements/static'))
+        .pipe(gulpSSHUser.dest('/var/www/veloprovements/static'))
 });
 
 gulp.task('remote:cleanup', function() {
-    return gulpSSH
+    return gulpSSHUser
         .exec([
             'rm -rf /var/www/veloprovements/static/*'
             ],
@@ -205,3 +218,30 @@ gulp.task('remote:cleanup', function() {
         .pipe(gulp.dest('logs'))
 });
 
+gulp.task('remote:deploy-python', ['remote:start-services-python']);
+
+gulp.task('remote:start-services-python', ['remote:transfer-python'], function() {
+    return gulpSSHRoot
+        .exec([
+            'systemctl start uwsgi',
+            'systemctl start nginx'
+            ],
+        {filePath: 'commands.log'})
+        .pipe(gulp.dest('logs'))
+});
+
+gulp.task('remote:transfer-python', ['remote:cleanup-python'], function() {
+    return gulp.src('../veloprovements.py')
+        .pipe(gulpSSHUser.dest('/var/www/veloprovements'))
+});
+
+gulp.task('remote:cleanup-python', [], function() {
+    return gulpSSHRoot
+        .exec([
+            'systemctl stop nginx',
+            'systemctl stop uwsgi',
+            'rm -f /var/www/veloprovements/veloprovements.py'
+            ],
+        {filePath: 'commands.log'})
+        .pipe(gulp.dest('logs'))
+});
