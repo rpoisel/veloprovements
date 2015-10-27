@@ -1,17 +1,6 @@
 var https = require('https');
 
-var loginAsTestUser = function() {
-    var userAction = element(by.id('userAction'));
-    var login_username = element(by.id('login_username'));
-    var login_password = element(by.id('login_password'));
-    var login_submit = element(by.id('login_submit'));
-
-    return userAction.click().then(function() {
-            login_username.sendKeys('test');
-            login_password.sendKeys('test');
-            login_submit.click()
-    });
-};
+var baseUrl = 'https://lamaquina';
 
 var httpsGet = function (siteUrl) {
     var defer = protractor.promise.defer();
@@ -41,9 +30,40 @@ var httpsGet = function (siteUrl) {
     return defer.promise;
 };
 
+function getRandomArbitrary(min, max) {
+        return Math.random() * (max - min) + min;
+}
+
+var loginAsTestUser = function(userAction, login_username, login_password, login_submit) {
+    var userAction = element(by.id('userAction'));
+    var login_username = element(by.id('login_username'));
+    var login_password = element(by.id('login_password'));
+    var login_submit = element(by.id('login_submit'));
+
+    return userAction.click().then(function() {
+            login_username.sendKeys('test');
+            login_password.sendKeys('test');
+            login_submit.click()
+    });
+};
+
+var drawPoint = function(map, x, y, name, description) {
+    var drawMarker = element(by.css('.leaflet-draw-draw-marker'));
+    var elemName = element(by.id('createVeloprovementName'));
+    var elemDescription = element(by.id('createVeloprovementDescription'));
+    var elemSubmit = element(by.id('createVeloprovementSubmit'));
+
+    drawMarker.click();
+    browser.actions().mouseMove(map, {x: x, y: y}) .click().perform();
+    browser.driver.sleep(500);
+    elemName.sendKeys(name);
+    elemDescription.sendKeys(description);
+    return elemSubmit.click();
+};
+
 describe('veloprovements', function() {
     it('should have the correct title', function() {
-        browser.get('https://lamaquina');
+        browser.get(baseUrl);
 
         expect(browser.getTitle()).toEqual('Veloprovements');
     });
@@ -51,32 +71,24 @@ describe('veloprovements', function() {
     it('create veloprovement as test user', function(done) {
 
         var map = element(by.id('veloprovementsmap'));
-        var drawMarker = element(by.css('.leaflet-draw-draw-marker'));
-        var createVeloprovementName = element(by.id('createVeloprovementName'));
-        var createVeloprovementDescription = element(by.id('createVeloprovementDescription'));
-        var createVeloprovementSubmit = element(by.id('createVeloprovementSubmit'));
         var lenBefore = 0, lenAfter = 0;
-        var geoQueryUrl = 'https://lamaquina/dynamic/veloprovements?southWestLat=48.19348500446728&southWestLng=15.616292953491211&northEastLat=48.20651434072251&northEastLng=15.643694400787352';
+        var geoQueryUrl = baseUrl + '/dynamic/veloprovements?southWestLat=48.19348500446728&southWestLng=15.616292953491211&northEastLat=48.20651434072251&northEastLng=15.643694400787352';
 
         httpsGet(geoQueryUrl).then(function(result) {
             lenBefore = JSON.parse(result.bodyString).features.length;
             loginAsTestUser().then(function() {
                     browser.driver.sleep(500); /* wait for panel to disappear */
-                    drawMarker.click();
-                    browser.actions().mouseMove(map, {x: 300, y: 300}) .click().perform();
-                    browser.driver.sleep(500);
-                    createVeloprovementName.sendKeys('Protractor');
-                    createVeloprovementDescription.sendKeys('was here');
-                    createVeloprovementSubmit.click().then(function() {
-                        httpsGet(geoQueryUrl).then(function(result) {
-                            lenAfter = JSON.parse(result.bodyString).features.length;
-                            expect(lenAfter).toEqual(lenBefore + 1);
-                            done();
+                    map.getSize().then(function(boundingBox) {
+                    drawPoint(map, getRandomArbitrary(50, boundingBox.width), getRandomArbitrary(50, boundingBox.height), 'Protractor', 'was here').then(function() {
+                            httpsGet(geoQueryUrl).then(function(result) {
+                                lenAfter = JSON.parse(result.bodyString).features.length;
+                                expect(lenAfter).toEqual(lenBefore + 1);
+                                done();
+                            });
                         });
                     });
-                });
+            });
         });
-
     });
 });
 
