@@ -55,10 +55,14 @@ var drawPoint = function(map, x, y, name, description) {
 
     drawMarker.click();
     browser.actions().mouseMove(map, {x: x, y: y}) .click().perform();
-    browser.driver.sleep(500);
+    waitForPanel();
     elemName.sendKeys(name);
     elemDescription.sendKeys(description);
     return elemSubmit.click();
+};
+
+var waitForPanel = function() {
+    browser.driver.sleep(500);
 };
 
 describe('veloprovements', function() {
@@ -77,7 +81,7 @@ describe('veloprovements', function() {
         httpsGet(geoQueryUrl).then(function(result) {
             lenBefore = JSON.parse(result.bodyString).features.length;
             loginAsTestUser().then(function() {
-                    browser.driver.sleep(500); /* wait for panel to disappear */
+                    waitForPanel();
                     map.getSize().then(function(boundingBox) {
                     drawPoint(map, getRandomArbitrary(50, boundingBox.width), getRandomArbitrary(50, boundingBox.height), 'Protractor', 'was here').then(function() {
                             httpsGet(geoQueryUrl).then(function(result) {
